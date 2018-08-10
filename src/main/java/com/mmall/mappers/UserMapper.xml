@@ -107,7 +107,7 @@
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.mmall.pojo.User" >
     update mmall_user
-    <set >
+    <set>
       <if test="username != null" >
         username = #{username,jdbcType=VARCHAR},
       </if>
@@ -151,4 +151,18 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+  <select id="checkUsername" resultType="int" parameterType="String" >
+    select count(0) from mmal_user
+    where username = #{username}
+  </select>
+
+  <select id="selectLogin" resultMap="BaseResultMap" parameterType="map" >
+    select
+    <include refid="Base_Column_List"/>
+      from mmal_user
+      where username = #{username}
+      and password = #{password}
+  </select>
+
+
 </mapper>
