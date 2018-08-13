@@ -132,8 +132,43 @@ public class UserServiceImpl implements IUserService {
     }
 
 
+    public ServerResponse<String> resetPassword(String passwordOld,String passwordNew,User user){
+    // 防止横向越权，需要校验一下这个用户的旧密码，
+        int resultCount = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
+        if(resultCount == 0 ){
+            return ServerResponse.createByErrorMessage("旧密码错误");
+        }
+        user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
+        int updateCount = userMapper.updateByPrimaryKeySelective(user);
+        if(updateCount > 0){
+            return ServerResponse.createBySuccess("密码修改成功");
+        }
+
+        return ServerResponse.createByErrorMessage("密码修改失败");
+    }
 
 
+    public ServerResponse<User> updateInformatin(User user){
+        //username不能更新
+        //email也要校验，校验新的email是不是已存在并且不属于当前用户
+        int resultCount = userMapper.checkEmailByUserId(user.getEmail(),user.getId());
+        if (resultCount > 0){
+            return  ServerResponse.createByErrorMessage("email已存在，请更换email在尝试");
+        }
+        User updateUser = new User();
+        updateUser.setId(user.getId());
+//        updateUser.setUsername(user.getUsername());
+        updateUser.setEmail(user.getEmail());
+        updateUser.setPhone(user.getPhone());
+        updateUser.setQuestion(user.getQuestion());
+        updateUser.setAnswer(user.getAnswer());
+        int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
+        if(updateCount > 0){
+            return  ServerResponse.createBySuccess("个人信息更新成功",updateUser);
+        }
+        return ServerResponse.createByErrorMessage("个人信息更新失败");
+
+    }
 
 
 
